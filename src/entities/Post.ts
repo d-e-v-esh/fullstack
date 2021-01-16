@@ -15,7 +15,7 @@ export class Post {
   @Property({ type: "date", onUpdate: () => new Date() })
   updatedAt = new Date();
 
-  @Field()
+  @Field() // You choose what you want to expose in the schema by adding the Field tag.
   @Property({ type: "text" })
   title!: string;
 }
