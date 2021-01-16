@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
@@ -6,26 +7,26 @@ import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
-const main = async () => {
-  // 1. Connect to the database
-  // 2. Run migrations
-  // 3. Run sql
+import { PostResolver } from "./resolvers/post";
 
-  const orm = await MikroORM.init(microConfig); // Basically we got the type that init expects for its first parameter
+const main = async () => {
+  const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up();
 
   const app = express();
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver],
+      resolvers: [HelloResolver, PostResolver],
       validate: false,
     }),
+    context: () => ({ em: orm.em }),
   });
 
   apolloServer.applyMiddleware({ app });
+
   app.listen(4000, () => {
-    console.log("server started on localhost: 4000"); // We listen to the app on port 4000
+    console.log("server started on localhost:4000");
   });
 };
 
