@@ -24,6 +24,7 @@ export class PostResolver {
 
   // Queries are for getting data
   // Mutation is for creating, updating and deleting (anything that changes things on the server)
+
   @Mutation(() => Post)
   async createPost(
     @Arg("title") title: string,
@@ -50,5 +51,14 @@ export class PostResolver {
       await em.persistAndFlush(post);
     }
     return post;
+  }
+
+  @Mutation(() => Boolean)
+  async deletePost(
+    @Arg("id") id: number,
+    @Ctx() { em }: MyContext
+  ): Promise<boolean> {
+    await em.nativeDelete(Post, { id });
+    return true;
   }
 }
