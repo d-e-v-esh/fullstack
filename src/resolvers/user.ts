@@ -6,6 +6,7 @@ import {
   Field,
   InputType,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
 } from "type-graphql";
@@ -17,6 +18,27 @@ class UsernamePasswordInput {
   username: string;
   @Field()
   password: string;
+}
+
+// Object type we return from our mutations
+// Input types we use for arguments
+@ObjectType()
+class FieldError {
+  // This will be displayed in the UI
+  @Field()
+  field: string; // username or password that is wrong
+
+  @Field()
+  message: string; // user-friendly message what is wrong
+}
+
+@ObjectType()
+class UserResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => User, { nullable: true })
+  user?: User;
 }
 
 @Resolver()
@@ -33,5 +55,40 @@ export class UserResolver {
     });
     await em.persistAndFlush(user);
     return user;
+  }
+
+  @Mutation(() => UserResponse)
+  async login(
+    @Arg("options") options: UsernamePasswordInput,
+    @Ctx() { em }: MyContext
+  ): Promise<UserResponse> {
+    const user = await em.findOne(User, { username: options.username }); // First we want to specify that we want to search a user, then we can search by a username
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "that username doesn't exist",
+          },
+        ],
+      };
+    }
+    const valid = await argon2.verify(user.password, options.password);
+    // inside verify, we pass in the hashed password that we get from the database and then the plain text that we get from the graphql arg
+    // verify will return true or false whether the password matches
+
+    if (!valid) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "incorrect password",
+          },
+        ],
+      };
+    }
+    return {
+      user,
+    };
   }
 }
