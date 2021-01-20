@@ -48,7 +48,7 @@ export class UserResolver {
     if (!req.session.userId) {
       return null;
     }
-    const user = await em.findOne(User, { id: req.session!.userId });
+    const user = await em.findOne(User, { id: req.session.userId });
     return user;
   }
 
