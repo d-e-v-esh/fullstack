@@ -12,6 +12,7 @@ import { Wrapper } from "../components/Wrapper";
 import { InputField } from "../components/InputField";
 import { useMutation } from "urql";
 import { useRegisterMutation } from "../generated/graphql";
+import { toErrorMap } from "../utils/toErrorMap";
 interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
@@ -25,9 +26,10 @@ const Register: React.FC<registerProps> = ({}) => {
           const response = await register(values);
 
           if (response.data?.register.errors) {
-            setErrors({
-              username: "error here",
-            });
+            // setErrors expects an object with a key value pair like this
+            // setErrors({username: "error here"});
+            // the response we are getting form the backend => [{field: "username", message: "something wrong"}]
+            setErrors(toErrorMap(response.data.register.errors));
           }
         }}>
         {({ values, handleChange, isSubmitting }) => (
