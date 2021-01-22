@@ -20,13 +20,16 @@ const Register: React.FC<registerProps> = ({}) => {
     <Wrapper variant="small">
       <Formik
         initialValues={{ username: "", password: "" }}
-        onSubmit={async (values, {setErrors}) => {
+        onSubmit={async (values, { setErrors }) => {
           // The keys line up exactly with the values so we don't need to specify each one => username => username && password => password
           const response = await register(values);
 
-          if(response.data?.register.errors)
+          if (response.data?.register.errors) {
+            setErrors({
+              username: "error here",
+            });
+          }
         }}>
-
         {({ values, handleChange, isSubmitting }) => (
           <Form>
             <InputField
