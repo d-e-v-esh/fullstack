@@ -1,0 +1,13 @@
+# here instead of passing all values we just passed in a variable
+mutation Login($options: UsernamePasswordInput!) {
+  login(options: $options) {
+    errors {
+      field
+      message
+    }
+    user {
+      id
+      username
+    }
+  }
+}
