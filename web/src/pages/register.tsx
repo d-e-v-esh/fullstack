@@ -14,9 +14,11 @@ import { useMutation } from "urql";
 import { useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 interface registerProps {}
+import { useRouter } from "next/router";
 
 const Register: React.FC<registerProps> = ({}) => {
   const [{}, register] = useRegisterMutation();
+  const router = useRouter();
   return (
     <Wrapper variant="small">
       <Formik
@@ -26,10 +28,10 @@ const Register: React.FC<registerProps> = ({}) => {
           const response = await register(values);
 
           if (response.data?.register.errors) {
-            // setErrors expects an object with a key value pair like this
-            // setErrors({username: "error here"});
-            // the response we are getting form the backend => [{field: "username", message: "something wrong"}]
-            setErrors(toErrorMap(response.data.register.errors));
+            setErrors(toErrorMap(response.data?.register.errors)); // if errors occurred
+          } else if (response.data?.register.user) {
+            // if we found a user then send it to the homepage
+            router.push("/");
           }
         }}>
         {({ values, handleChange, isSubmitting }) => (
@@ -39,6 +41,7 @@ const Register: React.FC<registerProps> = ({}) => {
               placeholder="username"
               label="Username"
             />
+
             <Box mt={4}>
               <InputField
                 name="password"
@@ -46,6 +49,7 @@ const Register: React.FC<registerProps> = ({}) => {
                 label="Password"
                 type="password"
               />
+
               <Button
                 mt={4}
                 colorScheme="teal"
@@ -60,4 +64,5 @@ const Register: React.FC<registerProps> = ({}) => {
     </Wrapper>
   );
 };
+
 export default Register;

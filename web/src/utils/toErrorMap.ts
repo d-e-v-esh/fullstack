@@ -9,3 +9,7 @@ export const toErrorMap = (errors: FieldError[]) => {
   });
   return errorMap;
 };
+
+// setErrors expects an object with a key value pair like this
+// setErrors({username: "error here"});
+// the response we are getting form the backend => [{field: "username", message: "something wrong"}]

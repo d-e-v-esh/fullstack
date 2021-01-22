@@ -11,7 +11,7 @@ import {
   Resolver,
 } from "type-graphql";
 import argon2 from "argon2";
-
+import { EntityManager } from "@mikro-orm/postgresql";
 @InputType()
 class UsernamePasswordInput {
   @Field()
@@ -80,13 +80,21 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(options.password);
-
-    const user = em.create(User, {
-      username: options.username,
-      password: hashedPassword,
-    });
+    let user;
     try {
-      await em.persistAndFlush(user);
+      const result = await (em as EntityManager)
+        .createQueryBuilder(User)
+        .getKnexQuery()
+        .insert({
+          username: options.username,
+          password: hashedPassword,
+          // mikro-orm adds underscores and knex doesn't know about that so we need to tell it what the column name is in the database
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        // so we are inserting the above data then return all the fields
+        .returning("*");
+      user = result[0];
     } catch (err) {
       if (err.code === "23505") {
         return {
