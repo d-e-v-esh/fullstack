@@ -5,6 +5,7 @@ import theme from "../theme";
 import { cacheExchange, QueryInput, Cache } from "@urql/exchange-graphcache";
 import {
   LoginMutation,
+  LogoutMutation,
   MeDocument,
   MeQuery,
   RegisterMutation,
@@ -34,6 +35,16 @@ const client = createClient({
         // All this will basically run update the cache at the right time => specifically the MeQuery
         // Alternatively we can skip updating the cache altogether and invalidate the MeQuery
         Mutation: {
+          // Setting me value to null
+          logout: (_result, args, cache, info) => {
+            betterUpdateQuery<LogoutMutation, MeQuery>(
+              cache,
+              { query: MeDocument },
+              _result,
+
+              () => ({ me: null })
+            );
+          },
           login: (_result, args, cache, info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
               cache,
