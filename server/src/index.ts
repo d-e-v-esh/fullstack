@@ -71,12 +71,3 @@ const main = async () => {
 main().catch((err) => {
   console.error(err);
 });
-
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf dfs  fsf ppd fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
-//bsthas sjsjsjsj ga dfs fgadf gas fsf gad fgad gsd fas fdas fdas kj lkjh l
