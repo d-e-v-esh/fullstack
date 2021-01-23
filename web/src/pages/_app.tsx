@@ -31,6 +31,8 @@ const client = createClient({
     dedupExchange,
     cacheExchange({
       updates: {
+        // All this will basically run update the cache at the right time => specifically the MeQuery
+        // Alternatively we can skip updating the cache altogether and invalidate the MeQuery
         Mutation: {
           login: (_result, args, cache, info) => {
             betterUpdateQuery<LoginMutation, MeQuery>(
