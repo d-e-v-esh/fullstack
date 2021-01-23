@@ -10,7 +10,7 @@ const Index = () => {
       <NavBar />
       <div>Hello World</div>
       <br />
-      // if we successfully do ssr then we won't see the loading indicator
+      {/* if we successfully do ssr then we won't see the loading indicator */}
       {!data ? (
         <div>Loading...</div>
       ) : (
@@ -20,4 +20,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Index);
+export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
