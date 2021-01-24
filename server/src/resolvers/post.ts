@@ -1,10 +1,7 @@
 import { Post } from "../entities/Post";
 import { MyContext } from "../types";
 import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
-// Need to put relative paths, default absolute paths will crash the app
-
-const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
+import { sleep } from "../utils/sleep";
 @Resolver()
 export class PostResolver {
   // Getting all posts
