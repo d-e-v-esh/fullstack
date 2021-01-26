@@ -23,7 +23,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserResolver = void 0;
 const type_graphql_1 = require("type-graphql");
@@ -31,7 +30,7 @@ const User_1 = require("../entities/User");
 const argon2_1 = __importDefault(require("argon2"));
 const constants_1 = require("../constants");
 const UsernamePasswordInput_1 = require("./UsernamePasswordInput");
-const validateRegister_1 = require("src/utils/validateRegister");
+const validateRegister_1 = require("../utils/validateRegister");
 let FieldError = class FieldError {
 };
 __decorate([
@@ -59,6 +58,11 @@ UserResponse = __decorate([
     type_graphql_1.ObjectType()
 ], UserResponse);
 let UserResolver = class UserResolver {
+    forgotPassword(email, { em }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return true;
+        });
+    }
     me({ req, em }) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!req.session.userId) {
@@ -70,9 +74,9 @@ let UserResolver = class UserResolver {
     }
     register(options, { em, req }) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = validateRegister_1.validateRegister(options);
-            if (response) {
-                return response;
+            const errors = validateRegister_1.validateRegister(options);
+            if (errors) {
+                return { errors };
             }
             const hashedPassword = yield argon2_1.default.hash(options.password);
             let user;
@@ -109,15 +113,13 @@ let UserResolver = class UserResolver {
     login(usernameOrEmail, password, { em, req }) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield em.findOne(User_1.User, usernameOrEmail.includes("@")
-                ? {
-                    email: usernameOrEmail,
-                }
+                ? { email: usernameOrEmail }
                 : { username: usernameOrEmail });
             if (!user) {
                 return {
                     errors: [
                         {
-                            field: "username",
+                            field: "usernameOrEmail",
                             message: "that username doesn't exist",
                         },
                     ],
@@ -153,6 +155,13 @@ let UserResolver = class UserResolver {
     }
 };
 __decorate([
+    type_graphql_1.Mutation(() => Boolean),
+    __param(0, type_graphql_1.Arg("email")), __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UserResolver.prototype, "forgotPassword", null);
+__decorate([
     type_graphql_1.Query(() => User_1.User, { nullable: true }),
     __param(0, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
@@ -164,7 +173,7 @@ __decorate([
     __param(0, type_graphql_1.Arg("options")),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_a = typeof UsernamePasswordInput_1.UsernamePasswordInput !== "undefined" && UsernamePasswordInput_1.UsernamePasswordInput) === "function" ? _a : Object, Object]),
+    __metadata("design:paramtypes", [UsernamePasswordInput_1.UsernamePasswordInput, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "register", null);
 __decorate([

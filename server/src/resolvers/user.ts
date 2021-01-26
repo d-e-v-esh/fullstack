@@ -13,7 +13,7 @@ import argon2 from "argon2";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { COOKIE_NAME } from "../constants";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
-import { validateRegister } from "src/utils/validateRegister";
+import { validateRegister } from "../utils/validateRegister";
 
 @ObjectType()
 class FieldError {
@@ -34,11 +34,11 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  // @Mutation(() => Boolean)
-  // async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
-  //   // const user = await em.findOne(User, {email})
-  //   return true;
-  // }
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+    // const user = await em.findOne(User, { email });
+    return true;
+  }
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
@@ -56,10 +56,11 @@ export class UserResolver {
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    const response = validateRegister(options);
-    if (response) {
-      return response;
+    const errors = validateRegister(options);
+    if (errors) {
+      return { errors };
     }
+
     const hashedPassword = await argon2.hash(options.password);
     let user;
     try {
@@ -107,16 +108,14 @@ export class UserResolver {
     const user = await em.findOne(
       User,
       usernameOrEmail.includes("@")
-        ? {
-            email: usernameOrEmail,
-          }
+        ? { email: usernameOrEmail }
         : { username: usernameOrEmail }
     );
     if (!user) {
       return {
         errors: [
           {
-            field: "username",
+            field: "usernameOrEmail",
             message: "that username doesn't exist",
           },
         ],

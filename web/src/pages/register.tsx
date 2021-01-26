@@ -24,10 +24,10 @@ const Register: React.FC<registerProps> = ({}) => {
   return (
     <Wrapper variant="small">
       <Formik
-        initialValues={{ username: "", password: "" }}
+        initialValues={{ email: "", username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           // The keys line up exactly with the values so we don't need to specify each one => username => username && password => password
-          const response = await register(values);
+          const response = await register({ options: values });
 
           if (response.data?.register.errors) {
             setErrors(toErrorMap(response.data?.register.errors)); // if errors occurred
@@ -45,21 +45,23 @@ const Register: React.FC<registerProps> = ({}) => {
             />
 
             <Box mt={4}>
+              <InputField name="email" placeholder="email" label="Email" />
+            </Box>
+            <Box mt={4}>
               <InputField
                 name="password"
                 placeholder="password"
                 label="Password"
                 type="password"
               />
-
-              <Button
-                mt={4}
-                colorScheme="teal"
-                type="submit"
-                isLoading={isSubmitting}>
-                Register
-              </Button>
             </Box>
+            <Button
+              mt={4}
+              colorScheme="teal"
+              type="submit"
+              isLoading={isSubmitting}>
+              Register
+            </Button>
           </Form>
         )}
       </Formik>
