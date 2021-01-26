@@ -24,11 +24,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const sleep_1 = require("../utils/sleep");
 let PostResolver = class PostResolver {
     posts({ em }) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield sleep(3000);
+            yield sleep_1.sleep(3000);
             return em.find(Post_1.Post, {});
         });
     }

@@ -17,6 +17,8 @@ import { COOKIE_NAME } from "../constants";
 @InputType()
 class UsernamePasswordInput {
   @Field()
+  email: string;
+  @Field()
   username: string;
   @Field()
   password: string;
@@ -41,6 +43,12 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  // @Mutation(() => Boolean)
+  // async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+  //   // const user = await em.findOne(User, {email})
+  //   return true;
+  // }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
     // you are not logged in
@@ -57,6 +65,17 @@ export class UserResolver {
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
+    if (!options.email.includes("@")) {
+      return {
+        errors: [
+          {
+            field: "email",
+            message: "invalid email",
+          },
+        ],
+      };
+    }
+
     if (options.username.length <= 2) {
       return {
         errors: [
@@ -87,6 +106,7 @@ export class UserResolver {
         .getKnexQuery()
         .insert({
           username: options.username,
+          email: options.email,
           password: hashedPassword,
           created_at: new Date(),
           updated_at: new Date(),
@@ -118,7 +138,7 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: options.username });

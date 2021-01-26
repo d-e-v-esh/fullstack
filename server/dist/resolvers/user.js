@@ -34,6 +34,10 @@ let UsernamePasswordInput = class UsernamePasswordInput {
 __decorate([
     type_graphql_1.Field(),
     __metadata("design:type", String)
+], UsernamePasswordInput.prototype, "email", void 0);
+__decorate([
+    type_graphql_1.Field(),
+    __metadata("design:type", String)
 ], UsernamePasswordInput.prototype, "username", void 0);
 __decorate([
     type_graphql_1.Field(),
@@ -80,6 +84,16 @@ let UserResolver = class UserResolver {
     }
     register(options, { em, req }) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!options.email.includes("@")) {
+                return {
+                    errors: [
+                        {
+                            field: "email",
+                            message: "invalid email",
+                        },
+                    ],
+                };
+            }
             if (options.username.length <= 2) {
                 return {
                     errors: [
@@ -108,6 +122,7 @@ let UserResolver = class UserResolver {
                     .getKnexQuery()
                     .insert({
                     username: options.username,
+                    email: options.email,
                     password: hashedPassword,
                     created_at: new Date(),
                     updated_at: new Date(),
