@@ -15,7 +15,7 @@ import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
-import { v4 } from uuid;
+import { v4 } from "uuid";
 
 @ObjectType()
 class FieldError {
@@ -36,6 +36,58 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("newPassword") newPassword: string,
+    @Ctx() { redis, em, req }: MyContext
+  ): Promise<UserResponse> {
+    if (newPassword.length <= 2) {
+      return {
+        errors: [
+          {
+            field: "newPassword",
+            message: "length must be greater than 2",
+          },
+        ],
+      };
+    }
+    // When we implemented forgot password, we made a key value pair of the token and userId. Now we check if the token provided contains a userId in the redis db
+    const userId = await redis.get(FORGET_PASSWORD_PREFIX + token);
+    if (!userId) {
+      // if we don't fine a user with that token then we return error
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "token expired",
+          },
+        ],
+      };
+    }
+    // if we find a user then we:
+    const user = await em.findOne(User, { id: parseInt(userId) }); // parseInt because redis stores userId as string
+    if (!user) {
+      // if the user account for some reason gets deleted then in the middle of the forgot password
+      return {
+        errors: [
+          {
+            field: "token",
+            message: "user no longer exists",
+          },
+        ],
+      };
+    }
+
+    // We set the new password to the user and updatedAt will be automatically updated
+    user.password = await argon2.hash(newPassword);
+    em.persistAndFlush(user);
+
+    //login user after change password
+    req.session.userId = user.id;
+    return { user };
+  }
+
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
@@ -58,6 +110,7 @@ export class UserResolver {
       email,
       `<a href='http://localhost:3000/change-password/${token}'>Reset Password</a>`
     );
+    return true;
   }
 
   @Query(() => User, { nullable: true })
