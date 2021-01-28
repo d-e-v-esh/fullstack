@@ -53,7 +53,8 @@ export class UserResolver {
       };
     }
     // When we implemented forgot password, we made a key value pair of the token and userId. Now we check if the token provided contains a userId in the redis db
-    const userId = await redis.get(FORGET_PASSWORD_PREFIX + token);
+    const key = FORGET_PASSWORD_PREFIX + token;
+    const userId = await redis.get(key);
     if (!userId) {
       // if we don't fine a user with that token then we return error
       return {
@@ -83,6 +84,7 @@ export class UserResolver {
     user.password = await argon2.hash(newPassword);
     em.persistAndFlush(user);
 
+    await redis.del(key);
     //login user after change password
     req.session.userId = user.id;
     return { user };
