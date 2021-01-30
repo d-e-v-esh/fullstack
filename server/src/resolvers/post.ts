@@ -6,18 +6,16 @@ import { sleep } from "../utils/sleep";
 export class PostResolver {
   // Getting all posts
   @Query(() => [Post])
-  async posts(@Ctx() { em }: MyContext): Promise<Post[]> {
+  async posts(): Promise<Post[]> {
     await sleep(3000);
-    return em.find(Post, {});
+    return Post.find();
   }
 
   // Reading a Post
+  // In typeorm, null => undefined
   @Query(() => Post, { nullable: true })
-  post(
-    @Arg("id", () => Int) id: number,
-    @Ctx() { em }: MyContext
-  ): Promise<Post | null> {
-    return em.findOne(Post, { id });
+  post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
+    return Post.findOne();
   }
 
   // Create Post
@@ -26,39 +24,32 @@ export class PostResolver {
   // Mutation is for creating, updating and deleting (anything that changes things on the server)
 
   @Mutation(() => Post)
-  async createPost(
-    @Arg("title") title: string,
-    @Ctx() { em }: MyContext
-  ): Promise<Post> {
-    const post = em.create(Post, { title });
-    await em.persistAndFlush(post);
-    return post;
+  async createPost(@Arg("title") title: string): Promise<Post> {
+    return Post.create({ title }).save();
   }
 
   @Mutation(() => Post, { nullable: true })
   async updatePost(
     @Arg("id") id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
+    @Arg("title", () => String, { nullable: true }) title: string
     // We need to define the type when we want to make that field optional and set nullable to true
-    @Ctx() { em }: MyContext
   ): Promise<Post | null> {
-    const post = await em.findOne(Post, { id });
+    const post = await Post.findOne(id);
+    // we can do .findOne(id) || .findOne({where}: {id})
     if (!post) {
       return null;
     }
     if (typeof title !== "undefined") {
       post.title = title;
-      await em.persistAndFlush(post);
+      // We will update the post based on the id that we fetched and the new title
+      await Post.update({ id }, { title });
     }
     return post;
   }
 
   @Mutation(() => Boolean)
-  async deletePost(
-    @Arg("id") id: number,
-    @Ctx() { em }: MyContext
-  ): Promise<boolean> {
-    await em.nativeDelete(Post, { id });
+  async deletePost(@Arg("id") id: number): Promise<boolean> {
+    await Post.delete(id);
     return true;
   }
 }
