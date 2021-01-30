@@ -20,9 +20,6 @@ export class PostResolver {
 
   // Create Post
 
-  // Queries are for getting data
-  // Mutation is for creating, updating and deleting (anything that changes things on the server)
-
   @Mutation(() => Post)
   async createPost(@Arg("title") title: string): Promise<Post> {
     return Post.create({ title }).save();
