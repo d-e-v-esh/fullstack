@@ -25,7 +25,7 @@ exports.PostResolver = void 0;
 const Post_1 = require("../entities/Post");
 const type_graphql_1 = require("type-graphql");
 const sleep_1 = require("../utils/sleep");
-const isAuth_1 = require("src/middleware/isAuth");
+const isAuth_1 = require("../middleware/isAuth");
 let PostInput = class PostInput {
 };
 __decorate([

@@ -12,7 +12,7 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { sleep } from "../utils/sleep";
-import { isAuth } from "src/middleware/isAuth";
+import { isAuth } from "../middleware/isAuth";
 
 @InputType()
 class PostInput {
