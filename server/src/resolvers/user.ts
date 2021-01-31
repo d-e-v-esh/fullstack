@@ -15,7 +15,6 @@ import { UsernamePasswordInput } from "./UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { sendEmail } from "../utils/sendEmail";
 import { v4 } from "uuid";
-import NextLink from "next/link";
 import { getConnection } from "typeorm";
 @ObjectType()
 class FieldError {
@@ -154,6 +153,7 @@ export class UserResolver {
         .returning("*")
         .execute();
       console.log("result", result);
+      user = result.raw[0];
     } catch (err) {
       console.log("error", err);
       if (err.code === "23505") {
