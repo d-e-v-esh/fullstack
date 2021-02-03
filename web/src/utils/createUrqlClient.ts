@@ -1,14 +1,28 @@
-import { dedupExchange, fetchExchange } from "urql";
+import { cacheExchange } from "@urql/exchange-graphcache";
+import Router from "next/router";
+import { dedupExchange, Exchange, fetchExchange } from "urql";
+import { pipe, tap } from "wonka";
 import {
-  LogoutMutation,
-  MeQuery,
-  MeDocument,
   LoginMutation,
+  LogoutMutation,
+  MeDocument,
+  MeQuery,
   RegisterMutation,
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 
-import { cacheExchange } from "@urql/exchange-graphcache";
+const errorExchange: Exchange = ({ forward }) => (ops$) => {
+  // Every time there is an error in anything we run, it is going to come here so we don't have to handle it in every single instance
+  return pipe(
+    forward(ops$),
+    tap(({ error }) => {
+      if (error?.message.includes("not authenticated")) {
+        Router.replace("/login"); // We are outside of React so we use the global router instead of the hook
+        // Replace => it replaces the current route in the history instead of pushing on a new entry. This is what we want to do when we want to re-direct
+      }
+    })
+  );
+};
 
 export const createUrqlClient = (ssrExchange: any) => ({
   url: "http://localhost:4000/graphql",
@@ -73,7 +87,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
         },
       },
     }),
+    errorExchange,
     ssrExchange,
+
     fetchExchange,
   ],
   // We want todo a custom exchange

@@ -49,7 +49,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   // user is logged in
 
   return (
-    <Flex bg="tomato" p={4} ml={"auto"}>
+    <Flex position="sticky" top={0} zIndex={1} bg="tomato" p={4} ml={"auto"}>
       <Box ml={"auto"}>{body}</Box>
     </Flex>
   );
