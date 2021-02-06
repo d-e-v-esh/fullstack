@@ -1,0 +1,46 @@
+import { ObjectType, Field } from "type-graphql";
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { User } from "./User";
+@ObjectType()
+@Entity()
+export class Post extends BaseEntity {
+  @Field()
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Field() // You choose what you want to expose in the schema by adding the Field tag.
+  @Column()
+  title!: string;
+
+  @Field()
+  @Column()
+  text!: string;
+
+  @Field()
+  @Column({ type: "int", default: 0 })
+  points!: number;
+
+  @Field()
+  @Column()
+  creatorId: number;
+
+  // This is going to set up a foreign key to the user's table
+  @ManyToOne(() => User, (user) => user.posts)
+  creator: User;
+
+  @Field(() => String)
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Field(() => String)
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
