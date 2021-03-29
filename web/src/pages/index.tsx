@@ -2,6 +2,8 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { usePostsQuery } from "../generated/graphql";
 import { Layout } from "../components/Layout";
+
+import { ChevronDownIcon, ChevronUpIcon, PhoneIcon } from "@chakra-ui/icons";
 import {
   Link,
   Stack,
@@ -10,6 +12,8 @@ import {
   Text,
   Flex,
   Button,
+  Icon,
+  IconButton,
 } from "@chakra-ui/react";
 
 import NextLink from "next/link";
@@ -43,11 +47,26 @@ const Index = () => {
       ) : (
         <Stack spacing={8}>
           {data!.posts.posts.map((p) => (
-            <Box key={p.id} p={5} shadow="md" borderWidth="1px">
-              <Heading fontSize="xl">{p.title}</Heading>
-              <Text>posted by {p.creator.username}</Text>
-              <Text mt={4}>{p.textSnippet}</Text>
-            </Box>
+            <Flex key={p.id} p={5} shadow="md" borderWidth="1px">
+              <Flex
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                mr={4}>
+                <IconButton aria-label="updoot post" icon={<ChevronUpIcon />} />
+                {p.points}
+                <IconButton
+                  aria-label="downdoot post"
+                  icon={<ChevronDownIcon />}
+                />
+              </Flex>
+
+              <Box>
+                <Heading fontSize="xl">{p.title}</Heading>
+                <Text>posted by {p.creator.username}</Text>
+                <Text mt={4}>{p.textSnippet}</Text>
+              </Box>
+            </Flex>
           ))}
         </Stack>
       )}
