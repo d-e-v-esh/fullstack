@@ -5,6 +5,7 @@ import {
   Ctx,
   Field,
   FieldResolver,
+  Info,
   InputType,
   Int,
   Mutation,
@@ -44,24 +45,53 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+    @Info() info: any
   ): Promise<PaginatedPosts> {
     // max limit will be 50. 50 and anything below is valid
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
     // we fetch one more than what we need
+
+    const replacements: any[] = [realLimitPlusOne];
+
+    if (cursor) {
+      replacements.push(new Date(parseInt(cursor)));
+    }
+
+    // this is a good setup if we want to know the creator when we fetch the post
+    const posts = await getConnection().query(
+      `
+    select p.*, 
+    json_build_object(
+      'id', u.id, 
+      'username', u.username,
+      'email', u.email,
+      'createdAt', u."createdAt",
+      'updatedAt', u."updatedAt"
+      ) creator
+    from post p
+    inner join public.user u on u.id = p."creatorId"
+    ${cursor ? `where p."createdAt" < $1` : ""}
+    order by p."createdAt" DESC
+    limit $1
+    `,
+      replacements
+    );
+
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
+      .innerJoinAndSelect("p.creator", "u", 'u.id = p."creatorId"')
+      .orderBy('p."createdAt"', "DESC")
       .take(realLimitPlusOne);
 
-    if (cursor) {
-      qb.where('"createdAt" < :cursor', {
-        cursor: new Date(parseInt(cursor)),
-      });
-    }
-    const posts = await qb.getMany();
+    // if (cursor) {
+    //   qb.where('p."createdAt" < :cursor', {
+    //     cursor: new Date(parseInt(cursor)),
+    //   });
+    // }
+    // const posts = await qb.getMany();
 
     // we give realLimit number of posts to users but we fetch one extra. If we do not get that extra post of fetch then we  know that we are at the end of the list.
     return {
