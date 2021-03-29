@@ -171,8 +171,9 @@ export class PostResolver {
   // Reading a Post
   // In typeorm, null => undefine
   @Query(() => Post, { nullable: true })
-  post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+  post(@Arg("id", () => Int) id: number): Promise<Post | undefined> {
+    return Post.findOne(id, { relations: ["creator"] });
+    // We are fetching the post id with the creator for when we click on the post
   }
 
   // Create Post
