@@ -19,7 +19,7 @@ const CreatePost: React.FC<{}> = ({}) => {
         // A real application would have validation on every single post
         initialValues={{ title: "", text: "" }}
         onSubmit={async (values) => {
-          console.log(values);
+          // console.log(values);
           const { error } = await createPost({ input: values });
           // If there are no errors then we go to the home route
           // Global handler will handle if there are errors
