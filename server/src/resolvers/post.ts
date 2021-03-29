@@ -11,8 +11,8 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { sleep } from "../utils/sleep";
 import { isAuth } from "../middleware/isAuth";
+import { getConnection } from "typeorm";
 
 @InputType()
 class PostInput {
@@ -25,11 +25,26 @@ class PostInput {
 
 @Resolver()
 export class PostResolver {
-  // Getting all posts
   @Query(() => [Post])
-  async posts(): Promise<Post[]> {
-    await sleep(3000);
-    return Post.find();
+  async posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
+  ): Promise<Post[]> {
+    // max limit will be 50. 50 and anything below is valid
+    const realLimit = Math.min(50, limit);
+    const qb = getConnection()
+      .getRepository(Post)
+      .createQueryBuilder("p")
+      .orderBy('"createdAt"', "DESC")
+      .take(realLimit);
+
+    if (cursor) {
+      qb.where('"createdAt" < :cursor', {
+        cursor: new Date(parseInt(cursor)),
+      });
+    }
+
+    return qb.getMany();
   }
 
   // Reading a Post

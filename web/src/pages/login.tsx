@@ -27,8 +27,17 @@ const Login: React.FC<{}> = ({}) => {
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data?.login.errors)); // if errors occurred
           } else if (response.data?.login.user) {
-            // if we found a user then send it to the homepage
-            router.push("/");
+            // if we found a user then send it to the homepage or the page where the user was before logging in
+            if (typeof router.query.next === "string") {
+              // if we set the next field in useIsAuth then it is going to be string.
+              // if router.query.next is a string then we will push to that path
+
+              router.push(router.query.next);
+            } else {
+              // if we did not set the next field in useIsAuth then it is going to be undefined.
+              // if the next field is undefine then we will push to the homepage
+              router.push("/");
+            }
           }
         }}>
         {({ values, handleChange, isSubmitting }) => (
