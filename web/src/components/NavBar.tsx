@@ -3,9 +3,12 @@ import React from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import { useRouter } from "next/router";
+
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
+  const router = useRouter();
   const [{ data, fetching }] = useMeQuery({
     // we don't want to make an extra query every time a page is SSR, we don't want that
     // this query results in null as the cookie is in our browser till now
@@ -40,8 +43,9 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         <Box mr={2}>{data.me.username}</Box>
 
         <Button
-          onClick={() => {
-            logout();
+          onClick={async () => {
+            await logout();
+            router.reload();
           }}
           variant="link"
           isLoading={logoutFetching}>
