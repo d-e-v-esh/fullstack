@@ -11,7 +11,7 @@ import { createUrqlClient } from "../../utils/createUrqlClient";
 import { toErrorMap } from "../../utils/toErrorMap";
 import NextLink from "next/link";
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: NextPage<{ token: string }> = () => {
   const router = useRouter();
   const [, changePassword] = useChangePasswordMutation();
   const [tokenError, setTokenError] = useState("");
@@ -25,7 +25,8 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
 
           const response = await changePassword({
             newPassword: values.newPassword,
-            token,
+            token:
+              typeof router.query.token === "string" ? router.query.token : "",
           });
 
           if (response.data?.changePassword.errors) {
@@ -74,12 +75,14 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   );
 };
 
-ChangePassword.getInitialProps = ({ query }) => {
-  // Special functions from next.js allows us to get any query parameters and pass to other components
+// if you don't need getInitialProps then you don't wanna have it there
+// If some of your pages don't have getInitialProps then next.js will make then static and optimize them
 
-  return {
-    token: query.token as string,
-  };
-};
+// ChangePassword.getInitialProps = ({ query }) => {
+//   // Special functions from next.js allows us to get any query parameters and pass to other components
+//   return {
+//     token: query.token as string,
+//   };
+// };
 
 export default withUrqlClient(createUrqlClient)(ChangePassword);

@@ -1,14 +1,17 @@
-import { ObjectType, Field } from "type-graphql";
+import { ObjectType, Field, Int } from "type-graphql";
 import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
   Entity,
-  ManyToOne,
+  Column,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
   UpdateDateColumn,
+  BaseEntity,
+  ManyToOne,
+  OneToMany,
 } from "typeorm";
 import { User } from "./User";
+import { Updoot } from "./Updoot";
+
 @ObjectType()
 @Entity()
 export class Post extends BaseEntity {
@@ -16,7 +19,7 @@ export class Post extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Field() // You choose what you want to expose in the schema by adding the Field tag.
+  @Field()
   @Column()
   title!: string;
 
@@ -28,13 +31,20 @@ export class Post extends BaseEntity {
   @Column({ type: "int", default: 0 })
   points!: number;
 
+  // this would be 1, -1, or null
+  @Field(() => Int, { nullable: true })
+  voteStatus: number | null;
+
   @Field()
   @Column()
   creatorId: number;
 
-  // This is going to set up a foreign key to the user's table
+  @Field()
   @ManyToOne(() => User, (user) => user.posts)
   creator: User;
+
+  @OneToMany(() => Updoot, (updoot) => updoot.post)
+  updoots: Updoot[];
 
   @Field(() => String)
   @CreateDateColumn()
