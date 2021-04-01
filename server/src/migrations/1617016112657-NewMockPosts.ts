@@ -300,5 +300,5 @@ Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan fe
         `);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(_: QueryRunner): Promise<void> {}
 }

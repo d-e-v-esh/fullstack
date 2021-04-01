@@ -311,7 +311,7 @@ Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan fe
         `);
         });
     }
-    down(queryRunner) {
+    down(_) {
         return __awaiter(this, void 0, void 0, function* () { });
     }
 }
